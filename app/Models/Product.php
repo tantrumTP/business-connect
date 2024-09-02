@@ -18,7 +18,8 @@ class Product extends Model
         'media',
         'availability',
         'warranty',
-        'reviews'
+        'reviews',
+        'status'
     ];
 
     public function business()

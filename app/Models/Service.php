@@ -9,10 +9,30 @@ class Service extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'business_id',
+        'name',
+        'description',
+        'price',
+        'category',
+        'media',
+        'duration',
+        'reviews',
+        'status',
+    ];
 
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function media()
+    {
+        return $this->morphMany(Media::class, 'mediaable');
+    }
+
+    public function reviews()
+    {
+        return $this->morphMany(Review::class, 'mediaable');
     }
 }

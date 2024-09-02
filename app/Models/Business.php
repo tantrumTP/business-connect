@@ -28,7 +28,8 @@ class Business extends Model
         'social_networks',
         'reviews',
         'characteristics',
-        'covered_areas'
+        'covered_areas',
+        'status'
     ];
 
     // Si usas JSON, recuerda castear los campos
