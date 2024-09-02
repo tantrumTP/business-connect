@@ -9,9 +9,9 @@ class Review extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['mediaable_id', 'mediaable_type', 'user_id', 'rating', 'text'];
+    protected $fillable = ['reviewable_id', 'reviewable_type', 'user_id', 'rating', 'text'];
 
-    public function mediaable()
+    public function reviewable()
     {
         return $this->morphTo();
     }
