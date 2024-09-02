@@ -15,9 +15,7 @@ class Service extends Model
         'description',
         'price',
         'category',
-        'media',
         'duration',
-        'reviews',
         'status',
     ];
 
@@ -33,6 +31,6 @@ class Service extends Model
 
     public function reviews()
     {
-        return $this->morphMany(Review::class, 'mediaable');
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }
