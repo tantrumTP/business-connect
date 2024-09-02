@@ -20,13 +20,10 @@ class Business extends Model
         'direction',
         'phone',
         'email',
-        'services',
-        'products',
         'media',
         'hours',
         'website',
         'social_networks',
-        'reviews',
         'characteristics',
         'covered_areas',
         'status'
@@ -58,6 +55,6 @@ class Business extends Model
 
     public function reviews()
     {
-        return $this->morphMany(Review::class, 'mediaable');
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }
