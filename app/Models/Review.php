@@ -9,10 +9,10 @@ class Review extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = ['mediaable_id', 'mediaable_type', 'user_id', 'rating', 'text'];
 
-    public function business()
+    public function mediaable()
     {
-        return $this->belongsTo(Business::class);
+        return $this->morphTo();
     }
 }
