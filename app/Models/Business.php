@@ -15,35 +15,48 @@ class Business extends Model
      * @var array
      */
     protected $fillable = [
-        'nombre',
-        'descripcion',
-        'direccion',
-        'telefono',
-        'correoElectronico',
-        'serviciosProductos', // Considera usar JSON o una tabla relacionada
-        'precios', // Considera usar JSON o una tabla relacionada
-        'horariosAtencion', // Considera usar JSON
-        'fotos', // Considera usar JSON o una tabla relacionada
-        'videos', // Considera usar JSON o una tabla relacionada
-        'sitioWeb',
-        'redesSociales', // Considera usar JSON
-        'reseñas', // Considera usar JSON o una tabla relacionada
-        'calificaciones', // Considera usar JSON o una tabla relacionada
-        'caracteristicas', // Considera usar JSON
-        'zonasCubiertas' // Considera usar JSON
+        'name',
+        'description',
+        'direction',
+        'phone',
+        'email',
+        'services',
+        'products',
+        'media',
+        'hours',
+        'website',
+        'social_networks',
+        'reviews',
+        'characteristics',
+        'covered_areas'
     ];
 
     // Si usas JSON, recuerda castear los campos
     protected $casts = [
-        'serviciosProductos' => 'array',
-        'precios' => 'array',
-        'horariosAtencion' => 'array',
-        'fotos' => 'array',
-        'videos' => 'array',
-        'redesSociales' => 'array',
-        'reseñas' => 'array',
-        'calificaciones' => 'array',
-        'caracteristicas' => 'array',
-        'zonasCubiertas' => 'array',
+        'hours' => 'array',
+        'social_networks' => 'array',
+        'characteristics' => 'array',
+        'covered_areas' => 'array',
     ];
+
+
+    public function services()
+    {
+        return $this->hasMany(Service::class);
+    }
+
+    public function products()
+    {
+        return $this->hasMany(Product::class);
+    }
+
+    public function media()
+    {
+        return $this->hasMany(Media::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 }
