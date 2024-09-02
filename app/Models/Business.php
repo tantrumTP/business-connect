@@ -52,7 +52,7 @@ class Business extends Model
 
     public function media()
     {
-        return $this->hasMany(Media::class);
+        return $this->morphMany(Media::class, 'mediaable');
     }
 
     public function reviews()

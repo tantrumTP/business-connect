@@ -9,10 +9,22 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = [];
+    protected $fillable = [
+        'business_id',
+        'name',
+        'description',
+        'price',
+        'media',
+        'availability',
+    ];
 
     public function business()
     {
         return $this->belongsTo(Business::class);
+    }
+
+    public function media()
+    {
+        return $this->morphMany(Media::class, 'mediaable');
     }
 }

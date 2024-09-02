@@ -9,10 +9,10 @@ class Media extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['business_id', 'type', 'file_path', 'caption'];
+    protected $fillable = ['mediaable_id', 'mediaable_type', 'type', 'file_path', 'caption'];
 
-    public function business()
+    public function mediaable()
     {
-        return $this->belongsTo(Business::class);
+        return $this->morphTo();
     }
 }
