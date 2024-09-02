@@ -15,10 +15,8 @@ class Product extends Model
         'description',
         'price',
         'category',
-        'media',
         'availability',
         'warranty',
-        'reviews',
         'status'
     ];
 
@@ -34,6 +32,6 @@ class Product extends Model
 
     public function reviews()
     {
-        return $this->morphMany(Review::class, 'mediaable');
+        return $this->morphMany(Review::class, 'reviewable');
     }
 }
