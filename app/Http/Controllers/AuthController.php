@@ -8,7 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-class AuthController extends Controller
+//TODO: modify responses to use BaseController
+//TODO: password reset and mail confirmation
+class AuthController extends BaseController
 {
 
     /**
@@ -117,12 +119,12 @@ class AuthController extends Controller
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             $response['error'] = 'The provided credentials are incorrect.';
+            $response['status_response'] = 401;
         } else {
             $response['success'] = true;
             $response['token'] = $user->createToken('auth-token')->plainTextToken;
+            $response['status_response'] = 200;
         }
-
-        $response['status_response'] = 200;
 
 
         return response()->json($response, $response['status_response']);
