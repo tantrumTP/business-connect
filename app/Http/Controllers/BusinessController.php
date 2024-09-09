@@ -14,7 +14,7 @@ class BusinessController extends BaseController
      */
     public function index(): JsonResponse
     {
-        $businesses = auth()->user()->businesses()->paginate(15);
+        $businesses = $this->getUser()->businesses()->paginate(15);
         return $this->sendResponse(BusinessResource::collection($businesses)->response()->getData(true));
     }
 

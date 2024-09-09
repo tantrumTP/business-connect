@@ -4,9 +4,21 @@ namespace App\Http\Controllers;
 
 use Illuminate\Routing\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class BaseController extends Controller
 {
+
+    /**
+     * Get the authenticated user.
+     *
+     * @return \App\Models\User|null
+     */
+    protected function getUser()
+    {
+        return Auth::user();
+    }
+
     /**
      * success response method.
      *
