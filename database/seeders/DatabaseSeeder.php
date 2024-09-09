@@ -16,11 +16,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        Business::factory(10)
-        ->has(Product::factory(3))
-        ->has(Service::factory(2))
+        User::factory(3)
+        ->has(
+            Business::factory(10)
+            ->has(Product::factory(3))
+            ->has(Service::factory(2))
+            )
         ->create();
     }
 }

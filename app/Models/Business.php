@@ -15,6 +15,7 @@ class Business extends Model
      * @var array
      */
     protected $fillable = [
+        'user_id',
         'name',
         'description',
         'direction',
@@ -36,6 +37,11 @@ class Business extends Model
         'characteristics' => 'array',
         'covered_areas' => 'array',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 
 
     public function services()
