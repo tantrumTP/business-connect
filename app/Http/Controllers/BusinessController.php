@@ -59,7 +59,7 @@ class BusinessController extends BaseController
         } catch (Exception $e) {
             $response = $this->sendError('Error consulting business', ['exceptionMessage' => $e->getMessage()], 422);
         }
-        
+
         return $response;
     }
 
@@ -68,7 +68,28 @@ class BusinessController extends BaseController
      */
     public function update(Request $request, string $id)
     {
-        //
+        try {
+            $business = $this->getUser()->businesses()->findOrFail($id);
+            $attributes = $request->validate([
+                'name' => 'sometimes|required|string|max:255',
+                'description' => 'nullable|string',
+                'direction' => 'nullable|string',
+                'phone' => 'nullable|string|max:20',
+                'email' => 'sometimes|required|email|max:255',
+                'hours' => 'sometimes|required|array',
+                'website' => 'nullable|url|max:255',
+                'social_networks' => 'nullable|array',
+                'characteristics' => 'nullable|array',
+                'covered_areas' => 'nullable|array',
+                'status' => 'sometimes|required|in:active,inactive',
+            ]);
+        
+            $business->update($attributes);
+            $response = $this->sendResponse(new BusinessResource($business), 'Business updated succesfully');
+        } catch (Exception $e) {
+            $response = $this->sendError('Error updating business', ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        return $response;
     }
 
     /**
