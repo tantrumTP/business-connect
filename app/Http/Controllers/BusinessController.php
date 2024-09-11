@@ -25,7 +25,7 @@ class BusinessController extends BaseController
     public function store(Request $request)
     {
         $response = false;
-        try{
+        try {
             $validated_data = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -43,7 +43,7 @@ class BusinessController extends BaseController
         } catch (Exception $e) {
             $response = $this->sendError('Error on Business store', ['exceptionMessage' => $e->getMessage()], 422);
         }
-        
+
         return $response;
     }
 
@@ -52,7 +52,15 @@ class BusinessController extends BaseController
      */
     public function show(string $id)
     {
-        //
+        $response = false;
+        try {
+            $business = $this->getUser()->businesses()->findOrFail($id);
+            $response = $this->sendResponse(new BusinessResource($business));
+        } catch (Exception $e) {
+            $response = $this->sendError('Error consulting business', ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        
+        return $response;
     }
 
     /**
