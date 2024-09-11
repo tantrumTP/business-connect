@@ -18,8 +18,14 @@ class BusinessResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'created_at' => $this->created_at->format('d/m/Y'),
-            'updated_at' => $this->updated_at->format('d/m/Y'),
+            'direction' => $this->direction,
+            'phone' => $this->phone,
+            'email' => $this->email,
+            'hours' => $this->hours,
+            'website' => $this->website,
+            'social_networks' => $this->social_networks,
+            'characteristics' => $this->characteristics,
+            'covered_areas' => $this->covered_areas,
         ];
     }
 }
