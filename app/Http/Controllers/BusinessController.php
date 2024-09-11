@@ -83,7 +83,7 @@ class BusinessController extends BaseController
                 'covered_areas' => 'nullable|array',
                 'status' => 'sometimes|required|in:active,inactive',
             ]);
-        
+
             $business->update($attributes);
             $response = $this->sendResponse(new BusinessResource($business), 'Business updated succesfully');
         } catch (Exception $e) {
@@ -97,6 +97,13 @@ class BusinessController extends BaseController
      */
     public function destroy(string $id)
     {
-        //
+        try {
+            $business = $this->getUser()->businesses()->findOrFail($id);
+            $business->delete();
+            $response = $this->sendResponse(['id' => $id], 'Business remove succesfully');
+        } catch (Exception $e) {
+            $response = $this->sendError('Error deleting business', ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        return $response;
     }
 }
