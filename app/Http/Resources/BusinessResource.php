@@ -26,6 +26,17 @@ class BusinessResource extends JsonResource
             'social_networks' => $this->social_networks,
             'characteristics' => $this->characteristics,
             'covered_areas' => $this->covered_areas,
+            'media' => $this->when($this->additional['media'] ?? null, function () {
+                return [
+                    'data' => MediaResource::collection($this->additional['media']->items()),
+                    'pagination' => [
+                        'total' => $this->additional['media']->total(),
+                        'per_page' => $this->additional['media']->perPage(),
+                        'current_page' => $this->additional['media']->currentPage(),
+                        'last_page' => $this->additional['media']->lastPage(),
+                    ],
+                ];
+            }),
         ];
     }
 }

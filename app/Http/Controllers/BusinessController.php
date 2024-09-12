@@ -67,7 +67,12 @@ class BusinessController extends BaseController
         $response = false;
         try {
             $business = $this->getUser()->businesses()->findOrFail($id);
-            $response = $this->sendResponse(new BusinessResource($business));
+            $mediaPaginator = $business->media()->paginate(10);
+
+            $businessResource = new BusinessResource($business);
+            $businessResource->additional(['media' => $mediaPaginator]);
+
+            $response = $this->sendResponse($businessResource);
         } catch (Exception $e) {
             $response = $this->sendError('Error consulting business', ['exceptionMessage' => $e->getMessage()], 422);
         }
