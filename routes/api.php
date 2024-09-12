@@ -25,3 +25,11 @@ Route::middleware('auth:sanctum')->group( function () {
     ]);
 });
 /**END: Business routes*/
+
+/** Media routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('media', BusinessController::class)->only([
+        'index', 'store', 'show', 'update', 'destroy'
+    ]);
+});
+/**END: Media routes*/
