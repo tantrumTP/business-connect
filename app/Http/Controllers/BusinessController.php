@@ -7,9 +7,13 @@ use App\Models\Business;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use App\Traits\HandleMediaTrait;
 
 class BusinessController extends BaseController
 {
+
+    use HandleMediaTrait;
+
     /**
      * Display a listing of the resource.
      */
@@ -36,9 +40,17 @@ class BusinessController extends BaseController
                 'website' => 'nullable|url|max:255',
                 'social_networks' => 'nullable|array',
                 'characteristics' => 'nullable|array',
-                'covered_areas' => 'nullable|array'
+                'covered_areas' => 'nullable|array',
+                'media' => 'nullable|array',
+                'media.*.file' => 'required|file|mimes:jpeg,png,jpg,webp,mp4,mov,avi|max:20480',
+                'media.*.type' => 'required|in:image,video',
+                'media.*.caption' => 'nullable|string|max:255',
             ]);
             $business = $this->getUser()->businesses()->create($validated_data);
+
+            // Process media files
+            $this->handleMediaUpload($business, $request);
+
             $response = $this->sendResponse(new BusinessResource($business), 'Business successfully created.');
         } catch (Exception $e) {
             $response = $this->sendError('Error on Business store', ['exceptionMessage' => $e->getMessage()], 422);

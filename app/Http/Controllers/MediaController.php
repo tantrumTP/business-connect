@@ -6,16 +6,14 @@ use Illuminate\Http\Request;
 use App\Models\Media;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Support\Facades\Schema;
 
 class MediaController extends BaseController
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        
-    }
+    public function index() {}
 
     /**
      * Store a newly created resource in storage.
@@ -24,8 +22,27 @@ class MediaController extends BaseController
     {
         try {
             $request->validate([
-                'file' => 'required|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:20480', // 20MB max
-                'mediaable_type' => 'required|string',
+                'file' => 'required|file|mimes:jpeg,png,jpg,webp,mp4,mov,avi|max:20480', // 20MB max
+                'mediaable_type' => [
+                    'required',
+                    'string',
+                    function ($attribute, $value, $fail) {
+                        $validModels = [
+                            'App\\Models\\Business',
+                            'App\\Models\\Product',
+                            'App\\Models\\Service',
+                        ];
+                        // Check if is valid model
+                        if (!in_array($value, $validModels) || !class_exists($value)) {
+                            $fail("The {$attribute} must be a valid model type.");
+                        }
+                        // Check if model exists
+                        $model = new $value;
+                        if (!Schema::hasTable($model->getTable())) {
+                            $fail("The table for {$attribute} does not exist.");
+                        }
+                    },
+                ],
                 'mediaable_id' => 'required|integer',
                 'type' => 'required|in:image,video',
                 'caption' => 'nullable|string|max:255',
@@ -33,7 +50,7 @@ class MediaController extends BaseController
 
             $file = $request->file('file');
             $path = $file->store('media', 'public');
-    
+
             $media = Media::create([
                 'mediaable_type' => $request->mediaable_type,
                 'mediaable_id' => $request->mediaable_id,
@@ -42,7 +59,7 @@ class MediaController extends BaseController
                 'caption' => $request->caption,
             ]);
 
-            $response = $this->sendResponse($media, 'Media store sucessfully', 201);
+            $response = $this->sendResponse($media, 'Media stored sucessfully', 201);
         } catch (Exception $e) {
             $response = $this->sendError('Error on media store', [$e->getMessage()], 409);
         }

@@ -21,7 +21,6 @@ class Business extends Model
         'direction',
         'phone',
         'email',
-        'media',
         'hours',
         'website',
         'social_networks',
@@ -30,7 +29,7 @@ class Business extends Model
         'status'
     ];
 
-    // Si usas JSON, recuerda castear los campos
+    
     protected $casts = [
         'hours' => 'array',
         'social_networks' => 'array',

@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\MediaController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -28,7 +29,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
 /** Media routes*/
 Route::middleware('auth:sanctum')->group( function () {
-    Route::resource('media', BusinessController::class)->only([
+    Route::resource('media', MediaController::class)->only([
         'index', 'store', 'show', 'update', 'destroy'
     ]);
 });
