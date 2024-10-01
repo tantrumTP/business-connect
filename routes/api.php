@@ -21,7 +21,7 @@ Route::post('/register', [AuthController::class, 'register']);
 
 /** Business routes*/
 Route::middleware('auth:sanctum')->group( function () {
-    Route::resource('businesess', BusinessController::class)->only([
+    Route::resource('businesses', BusinessController::class)->only([
         'index', 'store', 'show', 'update', 'destroy'
     ]);
 });
