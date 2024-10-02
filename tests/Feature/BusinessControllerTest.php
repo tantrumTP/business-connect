@@ -18,18 +18,22 @@ class BusinessControllerTest extends TestCase
 
     private function getUser()
     {
-        return User::factory()->create();
+        $user = User::factory()->create();
+        Sanctum::actingAs($user, ['*']);
+        return $user;
     }
 
 
-    public function test_create_business()
+    private function mediaCreate()
     {
+        //Create fake file system
         Storage::fake('public');
+        //Simulate fake file on disk
+        return UploadedFile::fake()->image('fake-image.jpg');
+    }
 
-        $user = $this->getUser();
-        Sanctum::actingAs($user, ['*']);
-
-        $media = UploadedFile::fake()->image('image.jpg');
+    private function getBusinessData(UploadedFile $media)
+    {
         $businessData = [
             'name' => 'Business Test',
             'description' => 'Business created for automatic tests',
@@ -40,15 +44,26 @@ class BusinessControllerTest extends TestCase
             'website' => 'https://www.example.com',
             'social_networks' => ['facebook' => '@test', 'instagram' => '@test'],
             'characteristics' => ['innovator', 'modern'],
-            'covered_areas' => ['Granada', 'Jaén'],
-            'media' => [
+            'covered_areas' => ['Granada', 'Jaén']
+        ];
+        if ($media) {
+            $businessData['media'] = [
                 [
                     'file' => $media,
                     'type' => 'image',
                     'caption' => 'Example image'
                 ]
-            ]
-        ];
+            ];
+        }
+        return $businessData;
+    }
+
+    public function test_create_business()
+    {
+        $user = $this->getUser();
+
+        $media = $this->mediaCreate();
+        $businessData = $this->getBusinessData($media);
 
         $response = $this->postJson('/api/businesses', $businessData);
 
@@ -94,5 +109,34 @@ class BusinessControllerTest extends TestCase
 
         // Check business is associated with the correct user
         $this->assertEquals($user->id, $business->user_id);
+    }
+
+    public function test_show_business()
+    {
+        $user = $this->getUser();
+
+        $media = $this->mediaCreate();
+        $businessData = $this->getBusinessData($media);
+        $business = Business::create(array_merge($businessData, ['user_id' => $user->id]));
+
+        $response = $this->getJson("/api/businesses/{$business->id}");
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'result' => [
+                    'id',
+                    'name',
+                    'description',
+                    'direction',
+                    'phone',
+                    'email',
+                    'hours',
+                    'website',
+                    'social_networks',
+                    'characteristics',
+                    'covered_areas',
+                    'media',
+                ],
+            ]);
     }
 }
