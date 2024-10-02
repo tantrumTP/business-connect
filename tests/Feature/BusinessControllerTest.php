@@ -58,7 +58,7 @@ class BusinessControllerTest extends TestCase
         return $businessData;
     }
 
-    public function test_create_business()
+    public function test_create_business_success()
     {
         $user = $this->getUser();
 
@@ -111,7 +111,7 @@ class BusinessControllerTest extends TestCase
         $this->assertEquals($user->id, $business->user_id);
     }
 
-    public function test_show_business()
+    public function test_show_business_success()
     {
         $user = $this->getUser();
 
@@ -136,6 +136,47 @@ class BusinessControllerTest extends TestCase
                     'characteristics',
                     'covered_areas',
                     'media',
+                ],
+            ]);
+    }
+
+    public function test_update_business_success()
+    {
+        $user = $this->getUser();
+
+        $media = $this->mediaCreate();
+        $businessData = $this->getBusinessData($media);
+        $business = Business::create(array_merge($businessData, ['user_id' => $user->id]));
+
+        $params = [
+            'name' => 'Business name update',
+            'description' => 'description update',
+            'direction' => 'direction update',
+            'phone' => 'phone update',
+            'email' => 'test@example.com',
+            'hours' => ['9am-9pm'],
+            'website' => 'https://www.example.com',
+            'social_networks' => ['facebook' => '@testface'],
+            'characteristics' => ['Incredible','Amazing'],
+            'covered_areas' => ['Torremolinos', 'Torrenueva'],
+            'status' => 'active',
+        ];
+        $response = $this->putJson("/api/businesses/{$business->id}", $params);
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'result' => [
+                    'id',
+                    'name',
+                    'description',
+                    'direction',
+                    'phone',
+                    'email',
+                    'hours',
+                    'website',
+                    'social_networks',
+                    'characteristics',
+                    'covered_areas',
                 ],
             ]);
     }
