@@ -157,7 +157,7 @@ class BusinessControllerTest extends TestCase
             'hours' => ['9am-9pm'],
             'website' => 'https://www.example.com',
             'social_networks' => ['facebook' => '@testface'],
-            'characteristics' => ['Incredible','Amazing'],
+            'characteristics' => ['Incredible', 'Amazing'],
             'covered_areas' => ['Torremolinos', 'Torrenueva'],
             'status' => 'active',
         ];
@@ -178,6 +178,27 @@ class BusinessControllerTest extends TestCase
                     'characteristics',
                     'covered_areas',
                 ],
+            ]);
+    }
+
+    public function test_destroy_sucess()
+    {
+        $user = $this->getUser();
+
+        $media = $this->mediaCreate();
+        $businessData = $this->getBusinessData($media);
+        $business = Business::create(array_merge($businessData, ['user_id' => $user->id]));
+
+
+        $response = $this->deleteJson("/api/businesses/{$business->id}");
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'result' => [
+                    'id'
+                ],
+                'message'
             ]);
     }
 }
