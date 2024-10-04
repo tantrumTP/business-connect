@@ -31,7 +31,7 @@ class BusinessController extends BaseController
     {
         $response = false;
         try {
-            $validated_data = $request->validate([
+            $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'direction' => 'nullable|string',
@@ -47,7 +47,7 @@ class BusinessController extends BaseController
                 'media.*.type' => 'required|in:image,video',
                 'media.*.caption' => 'nullable|string|max:255',
             ]);
-            $business = $this->getUser()->businesses()->create($validated_data);
+            $business = $this->getUser()->businesses()->create($validatedData);
 
             // Process media files
             $this->handleMediaUpload($business, $request);

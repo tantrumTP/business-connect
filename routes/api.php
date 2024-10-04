@@ -39,7 +39,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
 /** Product routes*/
 Route::middleware('auth:sanctum')->group( function () {
-    Route::resource('product', ProductController::class)->only([
+    Route::resource('products', ProductController::class)->only([
         'store', 'show', 'update', 'destroy'
     ]);
 });
