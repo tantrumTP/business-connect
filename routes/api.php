@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\ProductController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -24,6 +25,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::resource('businesses', BusinessController::class)->only([
         'index', 'store', 'show', 'update', 'destroy'
     ]);
+    Route::get('businesses/{business}/products', [BusinessController::class, 'getProducts']);
 });
 /**END: Business routes*/
 
@@ -34,3 +36,11 @@ Route::middleware('auth:sanctum')->group( function () {
     ]);
 });
 /**END: Media routes*/
+
+/** Product routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('product', ProductController::class)->only([
+        'store', 'show', 'update', 'destroy'
+    ]);
+});
+/**END: Product routes*/
