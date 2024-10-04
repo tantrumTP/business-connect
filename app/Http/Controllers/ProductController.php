@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
 use Exception;
+use GuzzleHttp\Handler\Proxy;
 use Illuminate\Http\Request;
 
 class ProductController extends BaseController
@@ -40,7 +41,13 @@ class ProductController extends BaseController
      */
     public function show(string $id)
     {
-        //
+        try {
+            $product = Product::findOrFail($id);
+            $response = $this->sendResponse(new ProductResource($product));
+        } catch (Exception $e) {
+            $response = $this->sendError('Error retrieving product', ['exceptionMessage' => $e->getMessage()], 404);
+        }
+        return $response;
     }
 
     /**

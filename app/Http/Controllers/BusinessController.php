@@ -67,7 +67,7 @@ class BusinessController extends BaseController
     {
         $response = false;
         try {
-            $business = $this->getUser()->businesses()->findOrFail($id);
+            $business = Business::findOrFail($id);
             $mediaPaginator = $business->media()->paginate(10);
 
             $businessResource = new BusinessResource($business);
@@ -131,7 +131,7 @@ class BusinessController extends BaseController
      */
     public function getProducts(string $businessId){
         try{
-            $business = $this->getUser()->businesses()->findOrFail($businessId);
+            $business = Business::findOrFail($businessId);
             $products = $business->products()->paginate(15);
             $response = $this->sendResponse(ProductResource::collection($products)->response()->getData(true));
         } catch (Exception $e) {
