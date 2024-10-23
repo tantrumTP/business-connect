@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -28,6 +29,7 @@ Route::middleware('auth:sanctum')->group( function () {
 });
 Route::get('businesses/{business}', [BusinessController::class, 'show']);
 Route::get('businesses/{business}/products', [BusinessController::class, 'getProducts']);
+Route::get('businesses/{business}/services', [BusinessController::class, 'getServices']);
 /**END: Business routes*/
 
 /** Media routes*/
@@ -46,3 +48,12 @@ Route::middleware('auth:sanctum')->group( function () {
 });
 Route::get('products/{product}', [ProductController::class, 'show']);
 /**END: Product routes*/
+
+/** Services routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('services', ServiceController::class)->only([
+        'store', 'update', 'destroy'
+    ]);
+});
+Route::get('services/{product}', [ServiceController::class, 'show']);
+/**END: Services routes*/
