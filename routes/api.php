@@ -7,6 +7,7 @@ use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -57,3 +58,13 @@ Route::middleware('auth:sanctum')->group( function () {
 });
 Route::get('services/{service}', [ServiceController::class, 'show']);
 /**END: Services routes*/
+
+/** Review routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('reviews', ReviewController::class)->only([
+        'store', 'update', 'destroy'
+    ]);
+});
+Route::get('reviews', [ReviewController::class, 'index']);
+Route::get('reviews/{review}', [ReviewController::class, 'show']);
+/**END: Review routes*/
