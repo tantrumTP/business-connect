@@ -55,5 +55,5 @@ Route::middleware('auth:sanctum')->group( function () {
         'store', 'update', 'destroy'
     ]);
 });
-Route::get('services/{product}', [ServiceController::class, 'show']);
+Route::get('services/{service}', [ServiceController::class, 'show']);
 /**END: Services routes*/
