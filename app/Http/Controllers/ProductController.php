@@ -97,9 +97,9 @@ class ProductController extends BaseController
                 $response = $this->sendResponse(['id' => $id], 'Product removed successfully');
             }
         } catch (ModelNotFoundException $e) {
-            $response = $this->sendError('Error updating product', ['exceptionMessage' => 'The product not exists'], 422);
+            $response = $this->sendError('Error deleting product', ['exceptionMessage' => 'The product not exists'], 422);
         } catch (Exception $e) {
-            $response = $this->sendError('Error updating product', ['exceptionMessage' => $e->getMessage()], 422);
+            $response = $this->sendError('Error deleting product', ['exceptionMessage' => $e->getMessage()], 422);
         }
         return $response;
     }
