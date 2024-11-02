@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Business;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\Service;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -19,8 +20,8 @@ class DatabaseSeeder extends Seeder
         User::factory(3)
         ->has(
             Business::factory(10)
-            ->has(Product::factory(3))
-            ->has(Service::factory(2))
+            ->has(Product::factory(3)->has(Review::factory(5)))
+            ->has(Service::factory(2)->has(Review::factory(5)))
             )
         ->create();
     }
