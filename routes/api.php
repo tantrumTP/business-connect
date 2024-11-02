@@ -5,6 +5,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusinessController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -21,10 +24,13 @@ Route::post('/register', [AuthController::class, 'register']);
 
 /** Business routes*/
 Route::middleware('auth:sanctum')->group( function () {
-    Route::resource('businesess', BusinessController::class)->only([
+    Route::resource('businesses', BusinessController::class)->only([
         'index', 'store', 'show', 'update', 'destroy'
     ]);
 });
+Route::get('businesses/{business}', [BusinessController::class, 'show']);
+Route::get('businesses/{business}/products', [BusinessController::class, 'getProducts']);
+Route::get('businesses/{business}/services', [BusinessController::class, 'getServices']);
 /**END: Business routes*/
 
 /** Media routes*/
@@ -34,3 +40,31 @@ Route::middleware('auth:sanctum')->group( function () {
     ]);
 });
 /**END: Media routes*/
+
+/** Product routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('products', ProductController::class)->only([
+        'store', 'update', 'destroy'
+    ]);
+});
+Route::get('products/{product}', [ProductController::class, 'show']);
+/**END: Product routes*/
+
+/** Services routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('services', ServiceController::class)->only([
+        'store', 'update', 'destroy'
+    ]);
+});
+Route::get('services/{service}', [ServiceController::class, 'show']);
+/**END: Services routes*/
+
+/** Review routes*/
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('reviews', ReviewController::class)->only([
+        'store', 'update', 'destroy'
+    ]);
+});
+Route::get('reviews', [ReviewController::class, 'index']);
+Route::get('reviews/{review}', [ReviewController::class, 'show']);
+/**END: Review routes*/

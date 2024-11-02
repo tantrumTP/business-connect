@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BusinessResource;
+use App\Http\Resources\ProductResource;
+use App\Http\Resources\ServiceResource;
 use App\Models\Business;
 use Exception;
 use Illuminate\Http\Request;
@@ -30,7 +32,7 @@ class BusinessController extends BaseController
     {
         $response = false;
         try {
-            $validated_data = $request->validate([
+            $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
                 'description' => 'nullable|string',
                 'direction' => 'nullable|string',
@@ -46,7 +48,7 @@ class BusinessController extends BaseController
                 'media.*.type' => 'required|in:image,video',
                 'media.*.caption' => 'nullable|string|max:255',
             ]);
-            $business = $this->getUser()->businesses()->create($validated_data);
+            $business = $this->getUser()->businesses()->create($validatedData);
 
             // Process media files
             $this->handleMediaUpload($business, $request);
@@ -66,7 +68,7 @@ class BusinessController extends BaseController
     {
         $response = false;
         try {
-            $business = $this->getUser()->businesses()->findOrFail($id);
+            $business = Business::findOrFail($id);
             $mediaPaginator = $business->media()->paginate(10);
 
             $businessResource = new BusinessResource($business);
@@ -114,6 +116,7 @@ class BusinessController extends BaseController
      */
     public function destroy(string $id)
     {
+        //TODO: Do not completely remove, mark as inactive and do not show for at least 30 days, then remove
         try {
             $business = $this->getUser()->businesses()->findOrFail($id);
             $business->delete();
@@ -123,4 +126,34 @@ class BusinessController extends BaseController
         }
         return $response;
     }
+
+
+    /**
+     * Get Products related with business
+     */
+    public function getProducts(string $businessId){
+        try{
+            $business = Business::findOrFail($businessId);
+            $products = $business->products()->paginate(15);
+            $response = $this->sendResponse(ProductResource::collection($products)->response()->getData(true));
+        } catch (Exception $e) {
+            $response = $this->sendError("Error retrieving products of business with ID: {$business->id}", ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        return $response;
+    }
+
+    /**
+     * Get Services related with business
+     */
+    public function getServices(string $businessId){
+        try{
+            $business = Business::findOrFail($businessId);
+            $services = $business->services()->paginate(15);
+            $response = $this->sendResponse(ServiceResource::collection($services)->response()->getData(true));
+        } catch (Exception $e) {
+            $response = $this->sendError("Error retrieving services of business with ID: {$business->id}", ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        return $response;
+    }
+
 }
