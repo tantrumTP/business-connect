@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureJsonResponse;
+use App\Http\Middleware\HandlePathAlias;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
         $middleware->append(EnsureJsonResponse::class);
+        $middleware->append(HandlePathAlias::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->render(function (AuthenticationException $e, Request $request) {
