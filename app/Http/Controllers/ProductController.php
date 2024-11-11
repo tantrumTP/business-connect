@@ -27,10 +27,12 @@ class ProductController extends BaseController
                 'category' => 'nullable|string|max:255',
                 'availability' => 'nullable|boolean',
                 'warranty' => 'nullable|string',
-                'status' => 'sometimes|required|in:active,inactive'
+                'status' => 'sometimes|required|in:active,inactive',
+                'path_alias' => 'nullable|string|max:255'
             ]);
             $business = $this->getUser()->businesses()->findOrFail($productData['business_id']);
             $productCreated = $business->products()->create($productData);
+            $productCreated->createPathAlias($productData['path_alias']);
             $response = $this->sendResponse(new ProductResource($productCreated), 'Product created successfully');
         } catch (Exception $e) {
             $response = $this->sendError('Error creating product', ['exceptionMessage' => $e->getMessage()], 422);
