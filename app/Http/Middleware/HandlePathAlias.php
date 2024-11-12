@@ -18,22 +18,22 @@ class HandlePathAlias
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $path = '/' . trim($request->path(), '/');
+        if ($request->isMethod('GET')) {
+            $path = '/' . trim($request->path(), '/');
+            $alias = PathAlias::active()->where('alias', $path)->first();
+            if ($alias) {
+                // Create a new request with the original route
+                $originalRequest = Request::create($alias->path, $request->method());
 
-        
-        $alias = PathAlias::active()->where('alias', $path)->first();
-        if ($alias) {
-            // Create a new request with the original route
-            $originalRequest = Request::create($alias->path, $request->method());
+                // Dispatch the new request and get the response
+                $response = Route::dispatch($originalRequest);
 
-            // Dispatch the new request and get the response
-            $response = Route::dispatch($originalRequest);
-
-            return $response;
-        } else {
-            $originalPath = PathAlias::active()->where('path', $path)->first();
-            if($originalPath){
-                return Redirect::to($originalPath->alias, 301);
+                return $response;
+            } else {
+                $originalPath = PathAlias::active()->where('path', $path)->first();
+                if ($originalPath) {
+                    return Redirect::to($originalPath->alias, 301);
+                }
             }
         }
 

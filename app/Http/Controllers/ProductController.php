@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\ProductResource;
+use App\Models\PathAlias;
 use App\Models\Product;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use GuzzleHttp\Handler\Proxy;
 use Illuminate\Http\Request;
-use PhpParser\Node\Expr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProductController extends BaseController
 {
@@ -18,6 +19,7 @@ class ProductController extends BaseController
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
             $productData = $request->validate([
                 'business_id' => 'required|exists:businesses,id',
@@ -28,13 +30,20 @@ class ProductController extends BaseController
                 'availability' => 'nullable|boolean',
                 'warranty' => 'nullable|string',
                 'status' => 'sometimes|required|in:active,inactive',
-                'path_alias' => 'nullable|string|max:255'
+                'path_alias' => 'nullable|string|max:255|unique:path_aliases,alias'
             ]);
             $business = $this->getUser()->businesses()->findOrFail($productData['business_id']);
             $productCreated = $business->products()->create($productData);
-            $productCreated->createPathAlias($productData['path_alias']);
+            
+            if(!empty($productData['path_alias'])){
+                $productCreated->createPathAlias($productData['path_alias']);
+            }
+
+            DB::commit();
+            
             $response = $this->sendResponse(new ProductResource($productCreated), 'Product created successfully');
         } catch (Exception $e) {
+            DB::rollBack();
             $response = $this->sendError('Error creating product', ['exceptionMessage' => $e->getMessage()], 422);
         }
         return $response;
@@ -59,26 +68,42 @@ class ProductController extends BaseController
      */
     public function update(Request $request, string $id)
     {
+        DB::beginTransaction();
         try {
             $product = Product::findOrFail($id);
             //Check if the business with which the product is related belongs to the authenticated user
             $business = $this->getUser()->businesses()->findOrFail($product->business_id);
-            if ($business) {
-                $productData = $request->validate([
-                    'name' => 'required|string|max:255',
-                    'description' => 'nullable|string',
-                    'price' => 'required|numeric',
-                    'category' => 'nullable|string|max:255',
-                    'availability' => 'nullable|boolean',
-                    'warranty' => 'nullable|string',
-                    'status' => 'sometimes|required|in:active,inactive'
-                ]);
-                $product->update($productData);
-                $response = $this->sendResponse(new ProductResource($product), 'Product updated successfully');
+            $productData = $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'required|numeric',
+                'category' => 'nullable|string|max:255',
+                'availability' => 'nullable|boolean',
+                'warranty' => 'nullable|string',
+                'status' => 'sometimes|required|in:active,inactive',
+                'path_alias' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('path_aliases', 'alias')->ignore(
+                        $product->getAlias()->id ?? null
+                    )
+                ]
+            ]);
+            $product->update($productData);
+
+            if(!empty($productData['path_alias'])){
+                $product->createPathAlias($productData['path_alias']);
             }
+
+            DB::commit();
+
+            $response = $this->sendResponse(new ProductResource($product), 'Product updated successfully');
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             $response = $this->sendError('Error updating product', ['exceptionMessage' => 'The product not exists'], 422);
         } catch (Exception $e) {
+            DB::rollBack();
             $response = $this->sendError('Error updating product', ['exceptionMessage' => $e->getMessage()], 422);
         }
         return $response;

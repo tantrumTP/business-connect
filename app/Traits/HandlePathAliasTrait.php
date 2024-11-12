@@ -3,8 +3,6 @@
 namespace App\Traits;
 
 use App\Models\PathAlias;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
 
 trait HandlePathAliasTrait
 {
@@ -19,6 +17,12 @@ trait HandlePathAliasTrait
                 'status' => true
             ]
         );
+    }
+
+    public function getAlias()
+    {
+        $path = $this->getOriginalPath();
+        return PathAlias::where('path', $path)->first();
     }
 
     abstract public function getOriginalPath(): string;
