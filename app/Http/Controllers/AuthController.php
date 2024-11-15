@@ -36,10 +36,6 @@ class AuthController extends BaseController
      */
     public function register(Request $request)
     {
-        $response = [
-            'success' => false,
-        ];
-
         //Data validation
         try {
             $request->validate([
@@ -47,10 +43,8 @@ class AuthController extends BaseController
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
             ]);
-        } catch (ValidationException $e){
-            $response['error'] = $e->errors();
-            $response['status_response'] = 422;
-            return response()->json($response, $response['status_response']);
+        } catch (ValidationException $e) {
+            return $this->sendError('Registration error', ['errors' => $e->errors()], 422);
         }
 
         //try to create user
@@ -60,22 +54,19 @@ class AuthController extends BaseController
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-        } catch (Exception $e){
-            $response['error'] = $e->getMessage();
-            $response['status_response'] = 422;
-            return response()->json($response, $response['status_response']);
+        } catch (Exception $e) {
+            return $this->sendError('Registration error', ['error' => $e->getMessage()], 422);
         }
 
         if ($user) {
-            $response['success'] = true;
-            $response['token'] = $user->createToken('auth-token')->plainTextToken;
+            $token = $user->createToken('auth-token')->plainTextToken;
+            $response = $this->sendResponse(['token' => $token], 'User registered sucessfully');
         } else {
             $response['error'] = 'Something has gone wrong in the registry.';
+            $response = $this->sendError('Something has gone wrong in the registry.', [], 422);
         }
 
-        $response['status_response'] = 200;
-
-        return response()->json($response, $response['status_response']);
+        return $response;
     }
 
 
@@ -100,50 +91,37 @@ class AuthController extends BaseController
      */
     public function login(Request $request)
     {
-        $response = [
-            'success' => false,
-        ];
-
         try {
             $request->validate([
                 'email' => 'required|string|email',
                 'password' => 'required|string',
             ]);
         } catch (ValidationException $e) {
-            $response['error'] = $e->errors();
-            $response['status_response'] = 422;
-            return response()->json($response, $response['status_response']);
+            return $this->sendError('Login error', $e->errors(), 422);
         }
 
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            $response['error'] = 'The provided credentials are incorrect.';
-            $response['status_response'] = 401;
+            $response = $this->sendError('The provided credentials are incorrect.', [], 401);
         } else {
-            $response['success'] = true;
-            $response['token'] = $user->createToken('auth-token')->plainTextToken;
-            $response['status_response'] = 200;
+            $token = $user->createToken('auth-token')->plainTextToken;
+            $response = $this->sendResponse(['token' => $token], 'Login sucessfull');
         }
 
-
-        return response()->json($response, $response['status_response']);
+        return $response;
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $response = [
-            'success' => false
-        ];
-
         try {
-            $request->user()->tokens()->delete();
-            $response['success'] = true;
+            $user = $this->getUser();
+            $user->tokens()->delete();
+            $response = $this->sendResponse(['user' => $user->name, 'id' => $user->id], 'Session closed successfully');
         } catch (Exception $e) {
-            $response['error'] = $e->getMessage();
+            $response = $this->sendError('Logout error', [$e->getMessage()], 422);
         }
-    
 
-        return response()->json($response, 200);
+        return $response;
     }
 }
