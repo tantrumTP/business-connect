@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\HandlePathAliasTrait;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Business extends Model
 {
-    use HasFactory, HandlePathAliasTrait;
+    use HasFactory, HandlePathAliasTrait, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

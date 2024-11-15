@@ -147,9 +147,10 @@ class BusinessController extends BaseController
      */
     public function destroy(string $id)
     {
-        //TODO: Do not completely remove, mark as inactive and do not show for at least 30 days, then remove
         try {
             $business = $this->getUser()->businesses()->findOrFail($id);
+            $business->status = false;
+            $business->save();
             $business->delete();
             $response = $this->sendResponse(['id' => $id], 'Business remove succesfully');
         } catch (Exception $e) {
