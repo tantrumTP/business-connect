@@ -11,7 +11,7 @@ Brief description of the project.
 
 Follow these steps to set up the project in your local environment:
 
-1. Clone the repository: https://github.com/tantrumTP/bussiness-connect.git
+1. Clone the repository: https://github.com/tantrumTP/business-connect.git
 2. Start DDEV: ddev start
 3. Install PHP dependencies: ddev composer install
 4. Generate Laravel application key: ddev exec php artisan key:generate

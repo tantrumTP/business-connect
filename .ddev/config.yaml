@@ -1,4 +1,4 @@
-name: bussiness-connect
+name: business-connect
 type: laravel
 docroot: public
 php_version: "8.2"
