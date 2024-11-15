@@ -86,7 +86,7 @@ class ProductController extends BaseController
                     'string',
                     'max:255',
                     Rule::unique('path_aliases', 'alias')->ignore(
-                        $product->getAlias()->id ?? null
+                        $product->getPathAlias()->id ?? null
                     )
                 ]
             ]);

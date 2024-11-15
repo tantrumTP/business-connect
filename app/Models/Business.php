@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\HandlePathAliasTrait;
 
 class Business extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlePathAliasTrait;
 
     /**
      * The attributes that are mass assignable.
@@ -61,5 +62,10 @@ class Business extends Model
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function getOriginalPath(): string
+    {
+        return "/api/businesses/{$this->id}";
     }
 }

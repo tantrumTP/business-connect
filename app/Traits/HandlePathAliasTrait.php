@@ -8,6 +8,7 @@ trait HandlePathAliasTrait
 {
     public function createPathAlias($alias)
     {
+        $alias = '/' . trim($alias, '/');
         $path = $this->getOriginalPath();
 
         return PathAlias::updateOrCreate(
@@ -19,7 +20,7 @@ trait HandlePathAliasTrait
         );
     }
 
-    public function getAlias()
+    public function getPathAlias()
     {
         $path = $this->getOriginalPath();
         return PathAlias::where('path', $path)->first();

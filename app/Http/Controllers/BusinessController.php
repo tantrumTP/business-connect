@@ -10,6 +10,9 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use App\Traits\HandleMediaTrait;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class BusinessController extends BaseController
 {
@@ -30,7 +33,7 @@ class BusinessController extends BaseController
      */
     public function store(Request $request)
     {
-        $response = false;
+        DB::beginTransaction();
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
@@ -47,14 +50,22 @@ class BusinessController extends BaseController
                 'media.*.file' => 'required|file|mimes:jpeg,png,jpg,webp,mp4,mov,avi|max:20480',
                 'media.*.type' => 'required|in:image,video',
                 'media.*.caption' => 'nullable|string|max:255',
+                'path_alias' => 'nullable|string|max:255|unique:path_aliases,alias'
             ]);
             $business = $this->getUser()->businesses()->create($validatedData);
 
             // Process media files
             $this->handleMediaUpload($business, $request);
 
+            if ($validatedData['path_alias']) {
+                $business->createPathAlias($validatedData['path_alias']);
+            }
+
+            DB::commit();
+
             $response = $this->sendResponse(new BusinessResource($business), 'Business successfully created.');
         } catch (Exception $e) {
+            DB::rollBack();
             $response = $this->sendError('Error on Business store', ['exceptionMessage' => $e->getMessage()], 422);
         }
 
@@ -87,6 +98,7 @@ class BusinessController extends BaseController
      */
     public function update(Request $request, string $id)
     {
+        DB::beginTransaction();
         try {
             $business = $this->getUser()->businesses()->findOrFail($id);
             $attributes = $request->validate([
@@ -101,11 +113,30 @@ class BusinessController extends BaseController
                 'characteristics' => 'nullable|array',
                 'covered_areas' => 'nullable|array',
                 'status' => 'sometimes|required|in:active,inactive',
+                'path_alias' => [
+                    'nullable',
+                    'string',
+                    'max:255',
+                    Rule::unique('path_aliases', 'alias')->ignore(
+                        $business->getPathAlias()->id ?? null
+                    )
+                ]
             ]);
 
             $business->update($attributes);
+
+            if ($attributes['path_alias']) {
+                $business->createPathAlias($attributes['path_alias']);
+            }
+
+            DB::commit();
+
             $response = $this->sendResponse(new BusinessResource($business), 'Business updated succesfully');
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            $response = $this->sendError('Error updating business', ['exceptionMessage' => 'The business not exists'], 422);
         } catch (Exception $e) {
+            DB::rollBack();
             $response = $this->sendError('Error updating business', ['exceptionMessage' => $e->getMessage()], 422);
         }
         return $response;
@@ -131,8 +162,9 @@ class BusinessController extends BaseController
     /**
      * Get Products related with business
      */
-    public function getProducts(string $businessId){
-        try{
+    public function getProducts(string $businessId)
+    {
+        try {
             $business = Business::findOrFail($businessId);
             $products = $business->products()->paginate(15);
             $response = $this->sendResponse(ProductResource::collection($products)->response()->getData(true));
@@ -145,8 +177,9 @@ class BusinessController extends BaseController
     /**
      * Get Services related with business
      */
-    public function getServices(string $businessId){
-        try{
+    public function getServices(string $businessId)
+    {
+        try {
             $business = Business::findOrFail($businessId);
             $services = $business->services()->paginate(15);
             $response = $this->sendResponse(ServiceResource::collection($services)->response()->getData(true));
@@ -155,5 +188,4 @@ class BusinessController extends BaseController
         }
         return $response;
     }
-
 }

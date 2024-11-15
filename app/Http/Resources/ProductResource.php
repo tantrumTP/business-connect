@@ -21,6 +21,7 @@ class ProductResource extends JsonResource
             'category' => $this->category,
             'availability' => $this->avaliability,
             'warranty' => $this->warranty,
+            'path_alias' => $this->getPathAlias()->alias,
             'status' => $this->status
         ];
     }

@@ -37,6 +37,7 @@ class BusinessResource extends JsonResource
                     ],
                 ];
             }),
+            'path_alias' => $this->getPathAlias()->alias
         ];
     }
 }
