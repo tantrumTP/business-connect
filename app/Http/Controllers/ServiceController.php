@@ -27,7 +27,7 @@ class ServiceController extends BaseController
                 'price' => 'required|numeric',
                 'category' => 'nullable|string|max:255',
                 'duration' => 'nullable|integer',
-                'status' => 'sometimes|required|in:active,inactive',
+                'status' => 'sometimes|required|boolean',
                 'path_alias' => 'nullable|string|max:255|unique:path_aliases,alias'
             ]);
             $business = $this->getUser()->businesses()->findOrFail($serviceData['business_id']);
@@ -77,7 +77,7 @@ class ServiceController extends BaseController
                 'price' => 'required|numeric',
                 'category' => 'required|string|max:255',
                 'duration' => 'nullable|integer',
-                'status' => 'sometimes|required|in:active,inactive',
+                'status' => 'sometimes|required|boolean',
                 'path_alias' => [
                     'nullable',
                     'string',

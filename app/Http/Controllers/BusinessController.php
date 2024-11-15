@@ -112,7 +112,7 @@ class BusinessController extends BaseController
                 'social_networks' => 'nullable|array',
                 'characteristics' => 'nullable|array',
                 'covered_areas' => 'nullable|array',
-                'status' => 'sometimes|required|in:active,inactive',
+                'status' => 'sometimes|required|boolean',
                 'path_alias' => [
                     'nullable',
                     'string',
