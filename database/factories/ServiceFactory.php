@@ -23,7 +23,7 @@ class ServiceFactory extends Factory
             'price' => fake()->randomFloat(2, 10, 1000),
             'category' => fake()->word(),
             'duration' => fake()->randomDigitNotZero(),
-            'status' => fake()->randomElement(['active', 'inactive']),
+            'status' => true,
         ];
     }
 }

@@ -24,7 +24,7 @@ class ProductFactory extends Factory
             'category' => fake()->word(),
             'availability' => fake()->boolean(),
             'warranty' => fake()->word(),
-            'status' => fake()->randomElement(['active', 'inactive']),
+            'status' => true,
         ];
     }
 }
