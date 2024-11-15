@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\HandlePathAliasTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    use HasFactory;
+    use HasFactory, HandlePathAliasTrait;
 
     protected $fillable = [
         'business_id',
@@ -32,5 +33,10 @@ class Service extends Model
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function getOriginalPath(): string
+    {
+        return "/api/services/{$this->id}";
     }
 }
