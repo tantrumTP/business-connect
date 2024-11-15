@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Traits\HandlePathAliasTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
-    use HasFactory, HandlePathAliasTrait;
+    use HasFactory, HandlePathAliasTrait, SoftDeletes;
 
     protected $fillable = [
         'business_id',

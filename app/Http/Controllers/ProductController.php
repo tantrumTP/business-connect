@@ -114,12 +114,13 @@ class ProductController extends BaseController
      */
     public function destroy(string $id)
     {
-        //TODO: Do not completely remove, mark as inactive and do not show for at least 30 days, then remove
         try {
             $product = Product::findOrFail($id);
             //Check if the business with which the product is related belongs to the authenticated user
             $business = $this->getUser()->businesses()->findOrFail($product->business_id);
             if ($business) {
+                $product->status = false;
+                $product->save();
                 $product->delete();
                 $response = $this->sendResponse(['id' => $id], 'Product removed successfully');
             }

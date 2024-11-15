@@ -111,11 +111,12 @@ class ServiceController extends BaseController
      */
     public function destroy(string $id)
     {
-        //TODO: Do not completely remove, mark as inactive and do not show for at least 30 days, then remove
         try {
             $service = Service::findOrFail($id);
             // Check if service belongs to the user's business
             $business = $this->getUser()->businesses()->findOrFail($service->business_id);
+            $service->status = false;
+            $service->save();
             $service->delete($service);
             $response = $this->sendResponse(['id' => $id], 'Service removed sucessfully');
         } catch (ModelNotFoundException $e) {
