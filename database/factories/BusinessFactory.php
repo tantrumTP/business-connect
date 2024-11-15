@@ -27,7 +27,7 @@ class BusinessFactory extends Factory
             'social_networks' => ['social1' => fake()->url(), 'social2' => fake()->url()],
             'characteristics' => ['Feature1', 'Feature2'],
             'covered_areas' => ['Area1', 'Area2'],
-            'status' => $this->faker->randomElement(['active', 'inactive']),
+            'status' => true,
         ];
     }
 }
