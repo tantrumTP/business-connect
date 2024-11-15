@@ -7,8 +7,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\Verified;
 
-//TODO: modify responses to use BaseController
 //TODO: password reset and mail confirmation
 class AuthController extends BaseController
 {
@@ -59,8 +59,13 @@ class AuthController extends BaseController
         }
 
         if ($user) {
-            $token = $user->createToken('auth-token')->plainTextToken;
-            $response = $this->sendResponse(['token' => $token], 'User registered sucessfully');
+            try {
+                $user->sendEmailVerificationNotification();
+                $token = $user->createToken('auth-token')->plainTextToken;
+                $response = $this->sendResponse(['token' => $token], 'User registered sucessfully');
+            } catch (Exception $e) {
+                $response = $this->sendError('Something has gone wrong in the registry.', ['exceptionError' => $e->getMessage()], 422);
+            }
         } else {
             $response['error'] = 'Something has gone wrong in the registry.';
             $response = $this->sendError('Something has gone wrong in the registry.', [], 422);
@@ -120,6 +125,30 @@ class AuthController extends BaseController
             $response = $this->sendResponse(['user' => $user->name, 'id' => $user->id], 'Session closed successfully');
         } catch (Exception $e) {
             $response = $this->sendError('Logout error', [$e->getMessage()], 422);
+        }
+
+        return $response;
+    }
+
+    public function verify(Request $request)
+    {
+        try {
+            $user = User::findOrFail($request->route('id'));
+    
+            if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+                return $this->sendError('Verification error', ['message' => 'Invalid verification link'], 400);
+            }
+    
+            if ($user->hasVerifiedEmail()) {
+                return $this->sendResponse(['email' => $user->email], 'Email already verified');
+            }
+    
+            if ($user->markEmailAsVerified()) {
+                event(new Verified($user));
+                $response = $this->sendResponse(['email' => $user->email], 'Email successfully verified');
+            }
+        } catch (Exception $e) {
+            $response = $this->sendError('Verification error', ['exceptionMessage' => $e->getMessage()], 404);
         }
 
         return $response;
