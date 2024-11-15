@@ -29,7 +29,7 @@ class ProductController extends BaseController
                 'category' => 'nullable|string|max:255',
                 'availability' => 'nullable|boolean',
                 'warranty' => 'nullable|string',
-                'status' => 'sometimes|required|in:active,inactive',
+                'status' => 'sometimes|required|boolean',
                 'path_alias' => 'nullable|string|max:255|unique:path_aliases,alias'
             ]);
             $business = $this->getUser()->businesses()->findOrFail($productData['business_id']);
@@ -80,7 +80,7 @@ class ProductController extends BaseController
                 'category' => 'nullable|string|max:255',
                 'availability' => 'nullable|boolean',
                 'warranty' => 'nullable|string',
-                'status' => 'sometimes|required|in:active,inactive',
+                'status' => 'sometimes|required|boolean',
                 'path_alias' => [
                     'nullable',
                     'string',
