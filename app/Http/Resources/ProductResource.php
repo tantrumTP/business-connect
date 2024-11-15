@@ -14,6 +14,7 @@ class ProductResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $path_alias = $this->getPathAlias();
         return [
             'name' => $this->name,
             'description' => $this->description,
@@ -21,7 +22,7 @@ class ProductResource extends JsonResource
             'category' => $this->category,
             'availability' => $this->avaliability,
             'warranty' => $this->warranty,
-            'path_alias' => $this->getPathAlias()->alias,
+            'path_alias' => $path_alias ? $path_alias->alias : $this->getOriginalPath(),
             'status' => $this->status
         ];
     }
