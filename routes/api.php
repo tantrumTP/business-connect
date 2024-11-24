@@ -22,12 +22,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 Route::post('/register', [AuthController::class, 'register']);
 
 Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify'])
-    ->middleware(['signed'])
+    ->middleware(['signed'])// Middleware for digital signed urls (for security)
     ->name('verification.verify');
 
-/* Route::post('/email/resend', [AuthController::class, 'resend'])
-    ->middleware(['auth:sanctum', 'throttle:6,1'])
-    ->name('verification.send'); */
+Route::post('/email/resend', [AuthController::class, 'resend'])
+    ->middleware(['auth:sanctum', 'throttle:2,1'])// Middlware for limit 2 request per minute
+    ->name('verification.send');
 /** END:Authentication routes*/
 
 /** Business routes*/

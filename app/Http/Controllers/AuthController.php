@@ -134,21 +134,39 @@ class AuthController extends BaseController
     {
         try {
             $user = User::findOrFail($request->route('id'));
-    
+
             if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
                 return $this->sendError('Verification error', ['message' => 'Invalid verification link'], 400);
             }
-    
+
             if ($user->hasVerifiedEmail()) {
                 return $this->sendResponse(['email' => $user->email], 'Email already verified');
             }
-    
+
             if ($user->markEmailAsVerified()) {
                 event(new Verified($user));
                 $response = $this->sendResponse(['email' => $user->email], 'Email successfully verified');
             }
         } catch (Exception $e) {
             $response = $this->sendError('Verification error', ['exceptionMessage' => $e->getMessage()], 404);
+        }
+
+        return $response;
+    }
+
+    public function resend()
+    {
+        try {
+            $user = $this->getUser();
+
+            if ($user->hasVerifiedEmail()) {
+                return $this->sendResponse(['email' => $user->email], 'Email already verified');
+            }
+
+            $user->sendEmailVerificationNotification();
+            $response = $this->sendResponse(['email' => $user->email], 'Email successfully resend');
+        } catch (Exception $e) {
+            $response = $this->sendError('Resend email error', ['exceptionMessage' => $e->getMessage()], 402);
         }
 
         return $response;
