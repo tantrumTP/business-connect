@@ -14,7 +14,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-/** Authentication routes*/
+/** Authentication, verification and reset password routes*/
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -28,7 +28,11 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify'])
 Route::post('/email/resend', [AuthController::class, 'resend'])
     ->middleware(['auth:sanctum', 'throttle:2,1'])// Middlware for limit 2 request per minute
     ->name('verification.send');
-/** END:Authentication routes*/
+
+Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+
+Route::post('/reset-password', [AuthController::class, 'reset'])->name('password.update');
+/** END:Authentication, verification and reset password routes*/
 
 /** Business routes*/
 Route::middleware('auth:sanctum')->group( function () {

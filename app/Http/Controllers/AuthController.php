@@ -8,6 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
 
 //TODO: password reset and mail confirmation
 class AuthController extends BaseController
@@ -167,6 +172,61 @@ class AuthController extends BaseController
             $response = $this->sendResponse(['email' => $user->email], 'Email successfully resend');
         } catch (Exception $e) {
             $response = $this->sendError('Resend email error', ['exceptionMessage' => $e->getMessage()], 402);
+        }
+
+        return $response;
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        try {
+            $request->validate(['email' => 'required|email']);
+
+            $status = Password::sendResetLink(
+                $request->only('email'),
+                function ($user, $token) {
+                    $frontEndUrl = env('FRONTEND_URL');
+                    $resetUrl = "{$frontEndUrl}/reset-password?token={$token}&email={$user->email}";
+                    // Envía un correo con $resetUrl
+                    Mail::to($user->email)->send(new ResetPasswordMail($resetUrl));
+                }
+            );
+
+            $response = ($status === Password::RESET_LINK_SENT)
+                ? $this->sendResponse([], 'Reset link sent to your email')
+                : $this->sendError('Error generating link', ['message' => 'Unable to send reset link'], 400);
+        } catch (Exception $e) {
+            $response = $this->sendError('Error generating link', ['exceptionMessage' => $e->getMessage()], 400);
+        }
+
+        return $response;
+    }
+
+    public function reset(Request $request)
+    {
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|confirmed|min:8',
+            ]);
+
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password)
+                    ])->setRememberToken(Str::random(60));
+                    $user->save();
+                    event(new PasswordReset($user));
+                }
+            );
+
+            $response = ($status === Password::PASSWORD_RESET)
+                ? $this->sendResponse([], 'Password reset successfully')
+                : $this->sendError('Error resetting password', ['message' => 'Unable to reset password'], 400);
+        } catch (Exception $e) {
+            $response = $this->sendError('Error resetting password', ['exceptionMessage' => $e->getMessage()], 400);
         }
 
         return $response;

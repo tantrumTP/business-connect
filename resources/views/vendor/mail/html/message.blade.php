@@ -1,7 +1,7 @@
 <x-mail::layout>
 {{-- Header --}}
 <x-slot:header>
-<x-mail::header :url="config('app.url')">
+<x-mail::header :url="config('app.frontend_url')">
     <img src="{{ Storage::disk('public')->url('logo/logo.png') }}" class="logo" alt="{{ config('app.name') }}" width="75" height="52">
 </x-mail::header>
 </x-slot:header>
