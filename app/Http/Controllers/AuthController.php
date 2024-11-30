@@ -7,8 +7,13 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ResetPasswordMail;
 
-//TODO: modify responses to use BaseController
 //TODO: password reset and mail confirmation
 class AuthController extends BaseController
 {
@@ -36,10 +41,6 @@ class AuthController extends BaseController
      */
     public function register(Request $request)
     {
-        $response = [
-            'success' => false,
-        ];
-
         //Data validation
         try {
             $request->validate([
@@ -47,10 +48,8 @@ class AuthController extends BaseController
                 'email' => 'required|string|email|max:255|unique:users',
                 'password' => 'required|string|min:8|confirmed',
             ]);
-        } catch (ValidationException $e){
-            $response['error'] = $e->errors();
-            $response['status_response'] = 422;
-            return response()->json($response, $response['status_response']);
+        } catch (ValidationException $e) {
+            return $this->sendError('Registration error', ['errors' => $e->errors()], 422);
         }
 
         //try to create user
@@ -60,22 +59,24 @@ class AuthController extends BaseController
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-        } catch (Exception $e){
-            $response['error'] = $e->getMessage();
-            $response['status_response'] = 422;
-            return response()->json($response, $response['status_response']);
+        } catch (Exception $e) {
+            return $this->sendError('Registration error', ['error' => $e->getMessage()], 422);
         }
 
         if ($user) {
-            $response['success'] = true;
-            $response['token'] = $user->createToken('auth-token')->plainTextToken;
+            try {
+                $user->sendEmailVerificationNotification();
+                $token = $user->createToken('auth-token')->plainTextToken;
+                $response = $this->sendResponse(['token' => $token], 'User registered sucessfully');
+            } catch (Exception $e) {
+                $response = $this->sendError('Something has gone wrong in the registry.', ['exceptionError' => $e->getMessage()], 422);
+            }
         } else {
             $response['error'] = 'Something has gone wrong in the registry.';
+            $response = $this->sendError('Something has gone wrong in the registry.', [], 422);
         }
 
-        $response['status_response'] = 200;
-
-        return response()->json($response, $response['status_response']);
+        return $response;
     }
 
 
@@ -100,50 +101,134 @@ class AuthController extends BaseController
      */
     public function login(Request $request)
     {
-        $response = [
-            'success' => false,
-        ];
-
         try {
             $request->validate([
                 'email' => 'required|string|email',
                 'password' => 'required|string',
             ]);
         } catch (ValidationException $e) {
-            $response['error'] = $e->errors();
-            $response['status_response'] = 422;
-            return response()->json($response, $response['status_response']);
+            return $this->sendError('Login error', $e->errors(), 422);
         }
 
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            $response['error'] = 'The provided credentials are incorrect.';
-            $response['status_response'] = 401;
+            $response = $this->sendError('The provided credentials are incorrect.', [], 401);
         } else {
-            $response['success'] = true;
-            $response['token'] = $user->createToken('auth-token')->plainTextToken;
-            $response['status_response'] = 200;
+            $token = $user->createToken('auth-token')->plainTextToken;
+            $response = $this->sendResponse(['token' => $token], 'Login sucessfull');
         }
 
-
-        return response()->json($response, $response['status_response']);
+        return $response;
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
-        $response = [
-            'success' => false
-        ];
-
         try {
-            $request->user()->tokens()->delete();
-            $response['success'] = true;
+            $user = $this->getUser();
+            $user->tokens()->delete();
+            $response = $this->sendResponse(['user' => $user->name, 'id' => $user->id], 'Session closed successfully');
         } catch (Exception $e) {
-            $response['error'] = $e->getMessage();
+            $response = $this->sendError('Logout error', [$e->getMessage()], 422);
         }
-    
 
-        return response()->json($response, 200);
+        return $response;
+    }
+
+    public function verify(Request $request)
+    {
+        try {
+            $user = User::findOrFail($request->route('id'));
+
+            if (!hash_equals((string) $request->route('hash'), sha1($user->getEmailForVerification()))) {
+                return $this->sendError('Verification error', ['message' => 'Invalid verification link'], 400);
+            }
+
+            if ($user->hasVerifiedEmail()) {
+                return $this->sendResponse(['email' => $user->email], 'Email already verified');
+            }
+
+            if ($user->markEmailAsVerified()) {
+                event(new Verified($user));
+                $response = $this->sendResponse(['email' => $user->email], 'Email successfully verified');
+            }
+        } catch (Exception $e) {
+            $response = $this->sendError('Verification error', ['exceptionMessage' => $e->getMessage()], 404);
+        }
+
+        return $response;
+    }
+
+    public function resendVerification()
+    {
+        try {
+            $user = $this->getUser();
+
+            if ($user->hasVerifiedEmail()) {
+                return $this->sendResponse(['email' => $user->email], 'Email already verified');
+            }
+
+            $user->sendEmailVerificationNotification();
+            $response = $this->sendResponse(['email' => $user->email], 'Email successfully resend');
+        } catch (Exception $e) {
+            $response = $this->sendError('Resend email error', ['exceptionMessage' => $e->getMessage()], 402);
+        }
+
+        return $response;
+    }
+
+    public function sendResetLinkEmail(Request $request)
+    {
+        try {
+            $request->validate(['email' => 'required|email']);
+
+            $status = Password::sendResetLink(
+                $request->only('email'),
+                function ($user, $token) {
+                    $frontEndUrl = env('FRONTEND_URL');
+                    $resetUrl = "{$frontEndUrl}/reset-password?token={$token}&email={$user->email}";
+                    // Envía un correo con $resetUrl
+                    Mail::to($user->email)->send(new ResetPasswordMail($resetUrl));
+                }
+            );
+
+            $response = ($status === Password::RESET_LINK_SENT)
+                ? $this->sendResponse([], 'Reset link sent to your email')
+                : $this->sendError('Error generating link', ['message' => 'Unable to send reset link'], 400);
+        } catch (Exception $e) {
+            $response = $this->sendError('Error generating link', ['exceptionMessage' => $e->getMessage()], 400);
+        }
+
+        return $response;
+    }
+
+    public function resetPassword(Request $request)
+    {
+        try {
+            $request->validate([
+                'token' => 'required',
+                'email' => 'required|email',
+                'password' => 'required|confirmed|min:8',
+            ]);
+
+            $status = Password::reset(
+                $request->only('email', 'password', 'password_confirmation', 'token'),
+                function ($user, $password) {
+                    $user->forceFill([
+                        'password' => Hash::make($password)
+                    ])->setRememberToken(Str::random(60));
+                    $user->save();
+                    event(new PasswordReset($user));
+                }
+            );
+
+            $response = ($status === Password::PASSWORD_RESET)
+                ? $this->sendResponse([], 'Password reset successfully')
+                : $this->sendError('Error resetting password', ['message' => 'Unable to reset password'], 400);
+        } catch (Exception $e) {
+            $response = $this->sendError('Error resetting password', ['exceptionMessage' => $e->getMessage()], 400);
+        }
+
+        return $response;
     }
 }
