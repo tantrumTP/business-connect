@@ -159,7 +159,7 @@ class AuthController extends BaseController
         return $response;
     }
 
-    public function resend()
+    public function resendVerification()
     {
         try {
             $user = $this->getUser();
@@ -202,7 +202,7 @@ class AuthController extends BaseController
         return $response;
     }
 
-    public function reset(Request $request)
+    public function resetPassword(Request $request)
     {
         try {
             $request->validate([

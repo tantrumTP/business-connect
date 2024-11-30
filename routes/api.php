@@ -25,13 +25,13 @@ Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verify'])
     ->middleware(['signed'])// Middleware for digital signed urls (for security)
     ->name('verification.verify');
 
-Route::post('/email/resend', [AuthController::class, 'resend'])
+Route::post('/email/verify/resend', [AuthController::class, 'resendVerification'])
     ->middleware(['auth:sanctum', 'throttle:2,1'])// Middlware for limit 2 request per minute
     ->name('verification.send');
 
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 
-Route::post('/reset-password', [AuthController::class, 'reset'])->name('password.update');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 /** END:Authentication, verification and reset password routes*/
 
 /** Business routes*/

@@ -23,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
     {
         VerifyEmail::createUrlUsing(function ($notifiable) {
             $frontendUrl = env('FRONTEND_URL') .'/verify-email';
+            $apiUrl = config('app.url');
             $verifyUrl = URL::temporarySignedRoute(
                 'verification.verify',
                 now()->addMinutes(60),
@@ -31,7 +32,11 @@ class AppServiceProvider extends ServiceProvider
                     'hash' => sha1($notifiable->getEmailForVerification()),
                 ]
             );
-            return $frontendUrl . '?verify_url=' . urlencode($verifyUrl);
+
+            // Remove api domain to send relative url
+            $relativeUrl = str_replace($apiUrl, '', $verifyUrl);
+
+            return $frontendUrl . '?verify_url=' . urlencode($relativeUrl);
         });
     }
 }
