@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BusinessController;
+use App\Http\Controllers\InfoRequestController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
@@ -80,3 +81,12 @@ Route::middleware('auth:sanctum')->group( function () {
 Route::get('reviews', [ReviewController::class, 'index']);
 Route::get('reviews/{review}', [ReviewController::class, 'show']);
 /**END: Review routes*/
+
+/** Info Requests routes */
+Route::middleware('auth:sanctum')->group( function () {
+    Route::resource('infoRequests', InfoRequestController::class)->only([
+        'index', 'show'
+    ]);
+});
+Route::post('infoRequests', [InfoRequestController::class, 'store']);
+/** END: Info Requests routes */

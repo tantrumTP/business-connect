@@ -31,7 +31,7 @@ class Business extends Model
         'status'
     ];
 
-    
+
     protected $casts = [
         'hours' => 'array',
         'social_networks' => 'array',
@@ -63,6 +63,11 @@ class Business extends Model
     public function reviews()
     {
         return $this->morphMany(Review::class, 'reviewable');
+    }
+
+    public function infoRequests()
+    {
+        return $this->morphMany(InfoRequest::class, 'requestable');
     }
 
     public function getOriginalPath(): string
