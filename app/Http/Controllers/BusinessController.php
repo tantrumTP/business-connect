@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\BusinessResource;
-use App\Http\Resources\ProductResource;
-use App\Http\Resources\ServiceResource;
 use App\Models\Business;
 use Exception;
 use Illuminate\Http\Request;
@@ -159,34 +157,4 @@ class BusinessController extends BaseController
         return $response;
     }
 
-
-    /**
-     * Get Products related with business
-     */
-    public function getProducts(string $businessId)
-    {
-        try {
-            $business = Business::findOrFail($businessId);
-            $products = $business->products()->paginate(15);
-            $response = $this->sendResponse(ProductResource::collection($products)->response()->getData(true));
-        } catch (Exception $e) {
-            $response = $this->sendError("Error retrieving products of business with ID: {$business->id}", ['exceptionMessage' => $e->getMessage()], 422);
-        }
-        return $response;
-    }
-
-    /**
-     * Get Services related with business
-     */
-    public function getServices(string $businessId)
-    {
-        try {
-            $business = Business::findOrFail($businessId);
-            $services = $business->services()->paginate(15);
-            $response = $this->sendResponse(ServiceResource::collection($services)->response()->getData(true));
-        } catch (Exception $e) {
-            $response = $this->sendError("Error retrieving services of business with ID: {$business->id}", ['exceptionMessage' => $e->getMessage()], 422);
-        }
-        return $response;
-    }
 }

@@ -42,8 +42,6 @@ Route::middleware('auth:sanctum')->group( function () {
     ]);
 });
 Route::get('businesses/{business}', [BusinessController::class, 'show']);
-Route::get('businesses/{business}/products', [BusinessController::class, 'getProducts']);
-Route::get('businesses/{business}/services', [BusinessController::class, 'getServices']);
 /**END: Business routes*/
 
 /** Media routes*/
@@ -60,6 +58,7 @@ Route::middleware('auth:sanctum')->group( function () {
         'store', 'update', 'destroy'
     ]);
 });
+Route::get('businesses/{business}/products', [ProductController::class, 'index']);
 Route::get('products/{product}', [ProductController::class, 'show']);
 /**END: Product routes*/
 
@@ -69,6 +68,7 @@ Route::middleware('auth:sanctum')->group( function () {
         'store', 'update', 'destroy'
     ]);
 });
+Route::get('businesses/{business}/services', [ServiceController::class, 'index']);
 Route::get('services/{service}', [ServiceController::class, 'show']);
 /**END: Services routes*/
 
