@@ -10,9 +10,25 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Models\Business;
 
 class ProductController extends BaseController
 {
+
+    /**
+     * Get Products related with business
+     */
+    public function index(string $businessId)
+    {
+        try {
+            $business = Business::findOrFail($businessId);
+            $products = $business->products()->paginate(15);
+            $response = $this->sendResponse(ProductResource::collection($products)->response()->getData(true));
+        } catch (Exception $e) {
+            $response = $this->sendError("Error retrieving products of business with ID: {$business->id}", ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        return $response;
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -34,13 +50,13 @@ class ProductController extends BaseController
             ]);
             $business = $this->getUser()->businesses()->findOrFail($productData['business_id']);
             $productCreated = $business->products()->create($productData);
-            
-            if(!empty($productData['path_alias'])){
+
+            if (!empty($productData['path_alias'])) {
                 $productCreated->createPathAlias($productData['path_alias']);
             }
 
             DB::commit();
-            
+
             $response = $this->sendResponse(new ProductResource($productCreated), 'Product created successfully');
         } catch (Exception $e) {
             DB::rollBack();
@@ -92,7 +108,7 @@ class ProductController extends BaseController
             ]);
             $product->update($productData);
 
-            if(!empty($productData['path_alias'])){
+            if (!empty($productData['path_alias'])) {
                 $product->createPathAlias($productData['path_alias']);
             }
 
