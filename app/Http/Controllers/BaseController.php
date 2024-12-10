@@ -26,6 +26,7 @@ class BaseController extends Controller
      */
     public function sendResponse($result, $message = false)
     {
+        //TODO: Detect if $result is a resource and get the data processed by the resource (includes meta and links if paginated)
         $response = [
             'success' => true,
             'result'  => $result,
