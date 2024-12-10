@@ -14,7 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\ResetPasswordMail;
 
-//TODO: password reset and mail confirmation
+
 class AuthController extends BaseController
 {
 
