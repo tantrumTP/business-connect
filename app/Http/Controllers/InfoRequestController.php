@@ -163,12 +163,24 @@ class InfoRequestController extends BaseController
      */
     public function show(string $id)
     {
-        // TODO: obtener la solicitud de info relacionada con el negocio que toque, 
-        // si está relacionada con un producto o servicio pues filtrar por el negocio al que pertenezcan
         try {
+            $user = $this->getUser();
             $infoRequest = InfoRequest::findOrFail($id);
             // Check if the info request belongs to business that belongs to the user
-            
+            $requestableModel = $infoRequest->requestable;
+
+            switch ($infoRequest->requestable_type) {
+                case 'App\Models\Business':
+                    $user->businesses()->findOrFail($requestableModel->id);
+                    break;
+                case 'App\Models\Product':
+                case 'App\Models\Service':
+                    $user->businesses()->findOrFail($requestableModel->business_id);
+                    break;
+                default:
+                    abort(404, "There is no model of the type: {$infoRequest->requestable_type}");
+                    break;
+            }
 
             $response = $this->sendResponse(new InfoRequestResource($infoRequest));
         } catch (Exception $e) {
