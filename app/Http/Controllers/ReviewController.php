@@ -119,6 +119,8 @@ class ReviewController extends BaseController
         //TODO: Do not completely remove, mark as inactive and do not show for at least 30 days, then remove
         try {
             $review = $this->getUser()->reviews()->findOrFail($id);
+            $review->status = false;
+            $review->save();
             $review->delete();
             $response = $this->sendResponse(['id' => $id], 'Review removed sucessfully');
         }catch (ModelNotFoundException $e) {
