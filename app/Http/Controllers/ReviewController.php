@@ -116,7 +116,6 @@ class ReviewController extends BaseController
      */
     public function destroy(string $id)
     {
-        //TODO: Do not completely remove, mark as inactive and do not show for at least 30 days, then remove
         try {
             $review = $this->getUser()->reviews()->findOrFail($id);
             $review->status = false;
