@@ -9,9 +9,25 @@ use App\Http\Resources\ServiceResource;
 use App\Models\Service;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Models\Business;
 
 class ServiceController extends BaseController
 {
+
+    /**
+     * Get Services related with business
+     */
+    public function index(string $businessId)
+    {
+        try {
+            $business = Business::findOrFail($businessId);
+            $services = $business->services()->paginate(15);
+            $response = $this->sendResponse(ServiceResource::collection($services)->response()->getData(true));
+        } catch (Exception $e) {
+            $response = $this->sendError("Error retrieving services of business with ID: {$business->id}", ['exceptionMessage' => $e->getMessage()], 422);
+        }
+        return $response;
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -33,7 +49,7 @@ class ServiceController extends BaseController
             $business = $this->getUser()->businesses()->findOrFail($serviceData['business_id']);
             $serviceCreated = $business->services()->create($serviceData);
 
-            if($serviceData['path_alias']){
+            if ($serviceData['path_alias']) {
                 $serviceCreated->createPathAlias($serviceData['path_alias']);
             }
 
@@ -89,7 +105,7 @@ class ServiceController extends BaseController
             ]);
             $service->update($serviceData);
 
-            if($serviceData['path_alias']){
+            if ($serviceData['path_alias']) {
                 $service->createPathAlias($serviceData['path_alias']);
             }
 
