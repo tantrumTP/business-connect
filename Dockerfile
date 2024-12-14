@@ -12,8 +12,8 @@ RUN composer install --no-dev --optimize-autoloader
 # Create symbolic link for storage
 RUN php artisan storage:link
 
-# Run migrations
-RUN php artisan migrate --force
+# Set the web root to the public directory
+ENV WEBROOT /var/www/html/public
 
 # Expose port 80 for NGINX
 EXPOSE 80
